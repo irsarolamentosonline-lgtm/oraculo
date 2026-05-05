@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oráculo IRSA</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --void: #04060f;
+    --deep: #080d1e;
+    --surface: #0e1530;
+    --panel: #121a38;
+    --rim: rgba(100,130,255,0.18);
+    --rim2: rgba(100,130,255,0.08);
+    --accent: #5b8fff;
+    --accent2: #a78bfa;
+    --text: #e8ecff;
+    --muted: #7a8ab8;
+    --soft: #b0bcee;
+    --orb1: #1a2a6c;
+    --orb2: #3a1a6c;
+  }
+
+  body {
+    background: var(--void);
+    font-family: 'Sora', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  /* stars */
+  .stars {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 22% 38%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 35% 8%, rgba(255,255,255,0.7) 0%, transparent 100%),
+      radial-gradient(1px 1px at 48% 55%, rgba(200,210,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 60% 20%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 72% 70%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 83% 42%, rgba(200,210,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 91% 10%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 15% 80%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 55% 88%, rgba(200,210,255,0.4) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 78% 90%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 5% 52%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 40% 72%, rgba(200,210,255,0.35) 0%, transparent 100%),
+      radial-gradient(1px 1px at 68% 48%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(2px 2px at 88% 28%, rgba(180,200,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 52% 33%, rgba(200,210,255,0.4) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 18% 92%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 95% 65%, rgba(200,210,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 42% 18%, rgba(255,255,255,0.5) 0%, transparent 100%);
+  }
+
+  /* nebula glow */
+  .nebula {
+    position: fixed; pointer-events: none; z-index: 0;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.18;
+  }
+  .nebula-1 { width: 500px; height: 500px; top: -100px; left: -100px; background: #1a3aaa; }
+  .nebula-2 { width: 400px; height: 400px; bottom: -80px; right: -80px; background: #4a1a8a; }
+  .nebula-3 { width: 300px; height: 300px; top: 40%; left: 50%; transform: translate(-50%,-50%); background: #0a2a6a; }
+
+  /* layout */
+  .app {
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 0 1rem;
+  }
+
+  /* header */
+  header {
+    width: 100%; max-width: 720px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--rim2);
+  }
+  .logo-row { display: flex; align-items: center; gap: 10px; }
+  .logo-icon {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, #1e3a8a, #6d28d9);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px; font-weight: 700; color: #e8ecff;
+    border: 1px solid var(--rim);
+  }
+  .logo-name { font-size: 15px; font-weight: 600; letter-spacing: 0.02em; }
+  .logo-tag { font-size: 11px; color: var(--muted); font-weight: 300; letter-spacing: 0.06em; text-transform: uppercase; }
+  .header-badge {
+    font-size: 11px; color: var(--accent); background: rgba(91,143,255,0.1);
+    border: 1px solid rgba(91,143,255,0.25); border-radius: 20px;
+    padding: 3px 10px; font-weight: 400; letter-spacing: 0.03em;
+  }
+
+  /* hero */
+  .hero {
+    width: 100%; max-width: 720px;
+    text-align: center;
+    padding: 3.5rem 0 2rem;
+  }
+  .orb-wrap { position: relative; width: 80px; height: 80px; margin: 0 auto 1.5rem; }
+  .orb {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: radial-gradient(circle at 38% 36%, #3b6fff, #1a1a6e 60%, #0a0a2e);
+    border: 1px solid rgba(100,140,255,0.35);
+    position: relative;
+  }
+  .orb::after {
+    content: ''; position: absolute;
+    inset: -6px; border-radius: 50%;
+    border: 1px solid rgba(91,143,255,0.15);
+  }
+  .orb-ring {
+    position: absolute; inset: -14px; border-radius: 50%;
+    border: 1px solid rgba(91,143,255,0.08);
+  }
+
+  .hero h1 {
+    font-size: 2.4rem; font-weight: 600;
+    letter-spacing: -0.02em; line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+  .hero h1 span { color: var(--accent2); }
+  .hero p {
+    font-size: 0.95rem; color: var(--muted); font-weight: 300;
+    line-height: 1.65; max-width: 420px; margin: 0 auto 0.5rem;
+  }
+  .hero-hint {
+    font-size: 0.75rem; color: rgba(120,140,200,0.5);
+    letter-spacing: 0.05em; text-transform: uppercase; margin-top: 0.5rem;
+  }
+
+  /* quick questions */
+  .quick-label {
+    width: 100%; max-width: 720px;
+    font-size: 0.7rem; color: var(--muted); letter-spacing: 0.1em;
+    text-transform: uppercase; margin-bottom: 0.6rem; padding: 0 0.25rem;
+  }
+  .quick-grid {
+    width: 100%; max-width: 720px;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px; margin-bottom: 1.75rem;
+  }
+  .quick-btn {
+    background: var(--surface);
+    border: 1px solid var(--rim);
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    color: var(--soft);
+    font-size: 0.82rem; font-family: 'Sora', sans-serif;
+    cursor: pointer; text-align: left;
+    display: flex; align-items: center; gap: 8px;
+    transition: background 0.15s, border-color 0.15s;
+    line-height: 1.35;
+  }
+  .quick-btn:hover {
+    background: var(--panel);
+    border-color: rgba(100,130,255,0.35);
+    color: var(--text);
+  }
+  .quick-icon { font-size: 13px; opacity: 0.65; flex-shrink: 0; }
+
+  /* chat area */
+  .chat-area {
+    width: 100%; max-width: 720px;
+    flex: 1;
+    display: flex; flex-direction: column;
+    gap: 1rem;
+    padding-bottom: 0.5rem;
+    min-height: 100px;
+  }
+
+  /* messages */
+  .msg { display: flex; gap: 10px; align-items: flex-start; }
+  .msg.user { flex-direction: row-reverse; }
+  .avatar {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600;
+  }
+  .avatar.bot {
+    background: linear-gradient(135deg, #1e3a8a, #4c1d95);
+    color: #c4d0ff; border: 1px solid rgba(100,130,255,0.3);
+    font-family: 'Space Mono', monospace;
+  }
+  .avatar.user-av {
+    background: var(--surface); color: var(--muted);
+    border: 1px solid var(--rim);
+  }
+  .bubble {
+    max-width: 82%; padding: 0.7rem 1rem; border-radius: 12px;
+    font-size: 0.875rem; line-height: 1.6;
+  }
+  .bubble.bot {
+    background: var(--surface);
+    border: 1px solid var(--rim);
+    color: var(--soft);
+    border-top-left-radius: 4px;
+  }
+  .bubble.user {
+    background: rgba(91,143,255,0.13);
+    border: 1px solid rgba(91,143,255,0.25);
+    color: var(--text);
+    border-top-right-radius: 4px;
+  }
+  .bubble strong { color: var(--text); font-weight: 500; }
+  .bubble .code-pill {
+    background: rgba(91,143,255,0.12); border: 1px solid rgba(91,143,255,0.2);
+    border-radius: 5px; padding: 1px 7px; font-family: 'Space Mono', monospace;
+    font-size: 0.78rem; color: var(--accent); display: inline-block;
+  }
+
+  /* typing indicator */
+  .typing { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+  .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--muted); animation: pulse 1.4s infinite; }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes pulse { 0%,80%,100% { opacity: 0.3; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1); } }
+
+  /* input bar */
+  .input-bar {
+    width: 100%; max-width: 720px;
+    padding: 1rem 0 1.75rem;
+    position: sticky; bottom: 0;
+  }
+  .input-inner {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--rim);
+    border-radius: 14px; padding: 10px 10px 10px 16px;
+    transition: border-color 0.2s;
+  }
+  .input-inner:focus-within {
+    border-color: rgba(91,143,255,0.45);
+  }
+  .input-field {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: var(--text); font-family: 'Sora', sans-serif; font-size: 0.875rem;
+    font-weight: 300;
+  }
+  .input-field::placeholder { color: var(--muted); }
+  .send-btn {
+    width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+    background: var(--accent); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.15s;
+  }
+  .send-btn:hover { opacity: 0.85; }
+  .send-btn svg { width: 15px; height: 15px; fill: #fff; }
+
+  .input-footer {
+    text-align: center; font-size: 0.7rem; color: rgba(120,140,200,0.4);
+    margin-top: 0.5rem; letter-spacing: 0.02em;
+  }
+
+  /* divider */
+  .divider { width: 100%; max-width: 720px; height: 1px; background: var(--rim2); margin: 0.25rem 0; }
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<div class="nebula nebula-1"></div>
+<div class="nebula nebula-2"></div>
+<div class="nebula nebula-3"></div>
+
+<div class="app">
+
+  <header>
+    <div class="logo-row">
+      <div class="logo-icon">O</div>
+      <div>
+        <div class="logo-name">Oráculo</div>
+        <div class="logo-tag">IRSA · Base de conhecimento</div>
+      </div>
+    </div>
+    <div class="header-badge">online</div>
+  </header>
+
+  <div class="hero">
+    <div class="orb-wrap">
+      <div class="orb"></div>
+      <div class="orb-ring"></div>
+    </div>
+    <h1>A inteligência <span>técnica</span> da IRSA</h1>
+    <p>Pergunte sobre especificações, equivalências, aplicações e normas de rolamentos. O Oráculo responde com base no catálogo técnico da IRSA.</p>
+    <div class="hero-hint">Especificações · Equivalências · Aplicações · Normas</div>
+  </div>
+
+  <div class="quick-label">Perguntas frequentes</div>
+  <div class="quick-grid">
+    <button class="quick-btn" onclick="fillInput('Qual o equivalente IRSA para o rolamento 6305 ZZ?')">
+      <span class="quick-icon">🔄</span>
+      Equivalência de rolamento
+    </button>
+    <button class="quick-btn" onclick="fillInput('Quais as especificações técnicas do rolamento 6205?')">
+      <span class="quick-icon">📐</span>
+      Especificações técnicas
+    </button>
+    <button class="quick-btn" onclick="fillInput('Em quais aplicações industriais é usado o rolamento de rolos cônicos?')">
+      <span class="quick-icon">⚙️</span>
+      Aplicações industriais
+    </button>
+    <button class="quick-btn" onclick="fillInput('Qual a norma ISO para rolamentos de esferas de contato angular?')">
+      <span class="quick-icon">📋</span>
+      Normas e classificações
+    </button>
+  </div>
+
+  <div class="chat-area" id="chat">
+    <div class="msg">
+      <div class="avatar bot">O</div>
+      <div class="bubble bot">
+        Olá! Sou o Oráculo da IRSA. Pode perguntar sobre <strong>especificações técnicas</strong>, <strong>equivalências de rolamentos</strong>, <strong>aplicações industriais</strong> e <strong>normas</strong>. Estou aqui para te dar a resposta técnica certa na hora certa.
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="input-bar">
+    <div class="input-inner">
+      <input class="input-field" id="userInput" type="text" placeholder="Pergunte sobre especificações, equivalências, aplicações...">
+      <button class="send-btn" onclick="sendMsg()">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+    <div class="input-footer">O Oráculo pode cometer erros. Confirme informações críticas no catálogo oficial.</div>
+  </div>
+
+</div>
+
+<script>
+function fillInput(text) {
+  document.getElementById('userInput').value = text;
+  document.getElementById('userInput').focus();
+}
+
+function sendMsg() {
+  const input = document.getElementById('userInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const chat = document.getElementById('chat');
+
+  const userMsg = document.createElement('div');
+  userMsg.className = 'msg user';
+  userMsg.innerHTML = `<div class="avatar user-av">V</div><div class="bubble user">${text}</div>`;
+  chat.appendChild(userMsg);
+  input.value = '';
+
+  const typingEl = document.createElement('div');
+  typingEl.className = 'msg';
+  typingEl.innerHTML = `<div class="avatar bot">O</div><div class="bubble bot"><div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
+  chat.appendChild(typingEl);
+  typingEl.scrollIntoView({ behavior: 'smooth' });
+}
+
+document.getElementById('userInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') sendMsg();
+});
+</script>
+</body>
+</html>
