@@ -217,6 +217,10 @@
     border-top-right-radius: 4px;
   }
   .bubble strong { color: var(--text); font-weight: 500; }
+  .bubble p { margin: 0 0 0.5rem; }
+  .bubble p:last-child { margin-bottom: 0; }
+  .bubble ul { margin: 0.4rem 0 0.5rem 1.2rem; padding: 0; }
+  .bubble li { margin-bottom: 0.25rem; line-height: 1.55; }
   .bubble .code-pill {
     background: rgba(91,143,255,0.12); border: 1px solid rgba(91,143,255,0.2);
     border-radius: 5px; padding: 1px 7px; font-family: 'Space Mono', monospace;
@@ -377,8 +381,13 @@ async function sendMsg() {
       body: JSON.stringify({ mensagem: text, sessionId })
     });
     const data = await res.json();
-    const resposta = data.output || data.response || data.text || JSON.stringify(data);
-    typingEl.querySelector('.bubble').innerHTML = resposta;
+    const raw = data.saida || data.output || data.response || data.text || JSON.stringify(data);
+    const formatted = raw
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/^[\-\*]\s(.+)$/gm, '<li>$1</li>')
+      .replace(/\n{2,}/g, '</p><p>')
+      .replace(/\n/g, '<br>');
+    typingEl.querySelector('.bubble').innerHTML = '<p>' + formatted + '</p>';
   } catch (e) {
     typingEl.querySelector('.bubble').innerHTML = 'Erro ao conectar com o Oráculo. Tente novamente.';
   }
