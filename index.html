@@ -343,12 +343,15 @@
 </div>
 
 <script>
+const WEBHOOK = 'https://irsarolamentossa.app.n8n.cloud/webhook/daa14725-958f-4e70-964d-a0a36eaee949';
+const sessionId = 'sessao-' + Math.random().toString(36).substr(2, 9);
+
 function fillInput(text) {
   document.getElementById('userInput').value = text;
   document.getElementById('userInput').focus();
 }
 
-function sendMsg() {
+async function sendMsg() {
   const input = document.getElementById('userInput');
   const text = input.value.trim();
   if (!text) return;
@@ -359,11 +362,29 @@ function sendMsg() {
   userMsg.innerHTML = `<div class="avatar user-av">V</div><div class="bubble user">${text}</div>`;
   chat.appendChild(userMsg);
   input.value = '';
+  input.disabled = true;
 
   const typingEl = document.createElement('div');
   typingEl.className = 'msg';
   typingEl.innerHTML = `<div class="avatar bot">O</div><div class="bubble bot"><div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
   chat.appendChild(typingEl);
+  typingEl.scrollIntoView({ behavior: 'smooth' });
+
+  try {
+    const res = await fetch(WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mensagem: text, sessionId })
+    });
+    const data = await res.json();
+    const resposta = data.output || data.response || data.text || JSON.stringify(data);
+    typingEl.querySelector('.bubble').innerHTML = resposta;
+  } catch (e) {
+    typingEl.querySelector('.bubble').innerHTML = 'Erro ao conectar com o Oráculo. Tente novamente.';
+  }
+
+  input.disabled = false;
+  input.focus();
   typingEl.scrollIntoView({ behavior: 'smooth' });
 }
 
